@@ -1,0 +1,323 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Daha yumuşak köşeler */
+    --radius: 0.75rem;
+
+    /* ===============================
+       LIGHT MODE - Premium Corporate
+       =============================== */
+
+    /* Sayfa arka planı: #F3F4F6 */
+    --background: 220 14% 96%;
+    --foreground: 222 47% 11%;
+
+    /* Kartlar: beyaz */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    /* Muted: açık gri */
+    --muted: 220 13% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Kenarlıklar: hafif gri */
+    --border: 220 13% 91%;
+
+    /* Ring: kapalı */
+    --ring: 0 0% 0%;
+
+    /* Primary: #FF9B51 turuncu */
+    --primary: 26 100% 66%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 26 100% 61%;
+    --primary-active: 26 84% 54%;
+
+    /* Sidebar: #1F2937 koyu gri */
+    --sidebar: 217 33% 17%;
+    --sidebar-foreground: 0 0% 95%;
+
+    /* Topbar: #FAFBFC açık beyaz */
+    --topbar: 210 20% 99%;
+    --topbar-foreground: 222 47% 11%;
+
+    /* Destructive: kırmızı */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    /* Dark mode */
+    --background: 220 18% 10%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 16% 14%;
+    --card-foreground: 210 40% 96%;
+
+    --muted: 222 14% 18%;
+    --muted-foreground: 215 20% 72%;
+
+    --border: 222 10% 24%;
+    --ring: 0 0% 0%;
+
+    /* Primary: same #FF9B51 */
+    --primary: 26 100% 66%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 26 100% 56%;
+    --primary-active: 26 100% 46%;
+
+    /* Sidebar: dark and neutral */
+    --sidebar: 220 18% 10%;
+    --sidebar-foreground: 210 40% 96%;
+
+    /* Topbar: slightly lighter than background */
+    --topbar: 220 18% 12%;
+    --topbar-foreground: 210 40% 96%;
+
+    /* Destructive: kırmızı */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* ===============================
+     Ring kullanımı kapalı
+     =============================== */
+  :root :is(.ring, [class*=" ring-"], [class^="ring-"]) {
+    box-shadow: none !important;
+  }
+
+  .dark :is(.ring, [class*=" ring-"], [class^="ring-"]) {
+    box-shadow: none !important;
+  }
+}
+
+/* Toast her zaman modal üstünde görünsün */
+[data-sonner-toaster] {
+  z-index: 2147483647 !important;
+}
+
+/* ===============================
+   SweetAlert2 Premium Styling
+   =============================== */
+.swal2-popup-premium {
+  border-radius: 16px !important;
+  padding: 24px !important;
+  max-width: 420px;
+}
+
+.swal2-title-premium {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+  padding: 0 0 8px !important;
+}
+
+.swal2-html-premium {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  margin-top: 0 !important;
+}
+
+.swal-desc {
+  color: hsl(var(--muted-foreground)) !important;
+  margin: 0 0 16px !important;
+}
+
+.swal2-actions-premium {
+  margin-top: 20px !important;
+  gap: 10px !important;
+}
+
+.swal2-confirm-premium,
+.swal2-cancel-premium {
+  padding: 10px 14px !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+}
+
+.swal2-confirm-premium {
+  background-color: #ff9b51 !important;
+  color: white !important;
+  border: none !important;
+}
+
+.swal2-confirm-premium:hover {
+  background-color: #ff8a3a !important;
+}
+
+.swal2-cancel-premium {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+}
+
+.swal2-cancel-premium:hover {
+  background-color: hsl(var(--muted) / 0.8) !important;
+}
+
+/* İkon boyutunu küçült (sadece question/warning - success kendi SVG'sini kullanır) */
+.swal2-popup-premium .swal2-icon:not(.swal2-success) {
+  width: 56px !important;
+  height: 56px !important;
+  margin: 0 auto 12px !important;
+}
+
+.swal2-popup-premium .swal2-icon.swal2-question {
+  border-color: hsl(var(--primary) / 0.5) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+/* ===============================
+   Unassign Students Modal
+   =============================== */
+.swal-unassign-popup {
+  padding: 24px !important;
+  max-width: 420px;
+  border-radius: 1rem !important;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+}
+
+.swal-unassign-title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  padding: 0 0 8px !important;
+}
+
+.swal-unassign-html {
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.swal-unassign-message {
+  margin: 0 !important;
+}
+
+.swal-unassign-actions {
+  margin-top: 20px !important;
+  gap: 12px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+}
+
+.swal-unassign-confirm {
+  background-color: rgb(220 38 38) !important;
+  color: white !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  min-width: 120px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+}
+
+.swal-unassign-confirm:hover {
+  background-color: rgb(185 28 28) !important;
+}.swal-unassign-cancel {
+  background-color: hsl(var(--muted)) !important;
+  color: hsl(var(--foreground)) !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.5rem !important;
+  font-weight: 500 !important;
+  min-width: 120px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+}
+
+.swal-unassign-cancel:hover {
+  background-color: hsl(var(--muted) / 0.8) !important;
+}
+
+.swal-unassign-popup .swal2-icon.swal2-warning {
+  width: 56px !important;
+  height: 56px !important;
+  margin: 0 auto 12px !important;
+}
+
+/* Custom success icon (reset password) - CheckCircle SVG */
+.swal-head {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.swal-head .swal-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin: 12px 0 8px !important;
+  color: inherit;
+}
+
+.swal-icon-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+html.dark .swal-icon-ring {
+  background: rgba(34, 197, 94, 0.18);
+}
+
+.swal-check-icon {
+  color: rgb(34, 197, 94);
+  flex-shrink: 0;
+}
+
+/* Geçici şifre success modal */
+.swal-password-hint {
+  font-size: 14px !important;
+  color: hsl(var(--muted-foreground)) !important;
+  margin: 0 0 12px !important;
+}
+
+.swal-password-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: hsl(var(--muted) / 0.5);
+  border-radius: 10px;
+  margin: 0 0 16px;
+}
+
+.swal-password-code {
+  flex: 1;
+  font-family: ui-monospace, monospace;
+  font-size: 13px;
+  word-break: break-all;
+  color: hsl(var(--foreground));
+}
+
+.swal-copy-btn {
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: hsl(var(--primary));
+  color: white;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.swal-copy-btn:hover {
+  background: #ff8a3a;
+}

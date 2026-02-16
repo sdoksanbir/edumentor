@@ -1,0 +1,9 @@
+# Django & Core
+Django==6.0.2
+djangorestframework==3.16.1
+django-cors-headers==4.9.0
+djangorestframework-simplejwt==5.5.1
+PyJWT==2.11.0
+
+# Database (SQLite varsayılan - PostgreSQL için opsiyonel)
+# psycopg[binary]==3.3.2
