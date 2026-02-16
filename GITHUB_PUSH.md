@@ -1,38 +1,48 @@
 # GitHub'a Push Etme
 
-Commit atıldı. GitHub'a göndermek için:
+Remote zaten ekli: `https://github.com/sdoksanbir/edumentor`
 
-## 1. GitHub'da yeni repo oluştur
+## Kimlik doğrulama gerekli
 
-- https://github.com/new adresine git
-- Repo adı: `EDUMENTOR` (veya istediğin isim)
-- Public/Private seç
-- **"Add a README" ekleme** – zaten projede var
+GitHub artık şifre ile push kabul etmiyor. Aşağıdaki yöntemlerden birini kullan:
 
-## 2. Remote ekle ve push et
+### 1. Personal Access Token (PAT)
+
+1. GitHub → Settings → Developer settings → Personal access tokens
+2. "Generate new token" ile token oluştur (repo yetkisi ver)
+3. Push yaparken şifre yerine bu token'ı kullan:
 
 ```bash
 cd /Users/serkandoksanbir/Documents/PROGRAMLAMA/EDUMENTOR
-
-# GitHub kullanıcı adın ve repo adını aşağıda değiştir
-git remote add origin https://github.com/KULLANICI_ADIN/EDUMENTOR.git
-
-git branch -M main
 git push -u origin main
+# Username: sdoksanbir
+# Password: (token'ı yapıştır)
 ```
 
-`KULLANICI_ADIN` yerine kendi GitHub kullanıcı adını yaz.
+### 2. SSH (önerilen)
 
-## SSH kullanıyorsan
+SSH anahtarın varsa:
 
 ```bash
-git remote add origin git@github.com:KULLANICI_ADIN/EDUMENTOR.git
+git remote set-url origin git@github.com:sdoksanbir/edumentor.git
 git push -u origin main
 ```
+
+### 3. GitHub CLI
+
+```bash
+brew install gh
+gh auth login
+git push -u origin main
+```
+
+## Türkçe karakter ayarları
+
+Projeye `.gitattributes` eklendi (UTF-8, eol=lf). Türkçe karakter sorunu olmamalı.
 
 ---
 
-**Son commit mesajı:**
+**Commit mesajları:**
 ```
 feat: Admin analytics dashboard (backend + frontend)
 
