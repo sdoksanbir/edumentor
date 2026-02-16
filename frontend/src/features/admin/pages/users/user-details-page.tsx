@@ -38,6 +38,7 @@ import {
 import { listGradeLevels, catalogKeys } from "@features/admin/api/admin-api"
 import type { Gender } from "@features/admin/api/users-api"
 import { getTeacherStudents, type StudentListItem } from "@features/admin/api/teachers-api"
+import { SubscriptionCard } from "@features/billing/components/subscription-card"
 import { trTitle } from "@shared/lib/tr-string"
 import { normalizeTrPhone, validateTrGsmPhone } from "@shared/lib/phone"
 import { getErrorMessage } from "@shared/lib/toast-messages"
@@ -503,6 +504,9 @@ export function UserDetailsPage() {
       {/* Tab Content */}
       {activeTab === "general" && (
         <div className="grid gap-6 lg:grid-cols-2">
+          {user.role === "TEACHER" && user.teacher_profile_id && (
+            <SubscriptionCard teacherProfileId={user.teacher_profile_id} />
+          )}
           <InfoCard title="Profil Bilgileri" icon={User}>
             <dl className="space-y-3 text-sm">
               <div>
@@ -623,19 +627,17 @@ export function UserDetailsPage() {
           </InfoCard>
 
           {user.role === "TEACHER" && (
-            <div className="lg:col-span-2">
-              <InfoCard title="Atanan Öğrenciler" icon={Users}>
-                <UserAssignmentsList
-                  students={teacherStudents}
-                  teacherProfileId={user.teacher_profile_id!}
-                  onRefresh={() =>
-                    qc.invalidateQueries({
-                      queryKey: ["panel", "teachers", user.teacher_profile_id, "students"],
-                    })
-                  }
-                />
-              </InfoCard>
-            </div>
+            <InfoCard title="Atanan Öğrenciler" icon={Users}>
+              <UserAssignmentsList
+                students={teacherStudents}
+                teacherProfileId={user.teacher_profile_id!}
+                onRefresh={() =>
+                  qc.invalidateQueries({
+                    queryKey: ["panel", "teachers", user.teacher_profile_id, "students"],
+                  })
+                }
+              />
+            </InfoCard>
           )}
         </div>
       )}

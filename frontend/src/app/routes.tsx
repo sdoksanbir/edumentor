@@ -3,7 +3,8 @@ import { createBrowserRouter, Navigate } from "react-router-dom"
 import { AppShell } from "./layout/app-shell"
 
 import { UsersPage } from "../features/users/ui/users-page"
-import { BillingPage } from "../features/billing/ui/billing-page"
+import { PlansPage } from "../features/billing/pages/plans-page"
+import { SubscriptionsPage } from "../features/billing/pages/subscriptions-page"
 
 import { AuthLayout } from "./layout/auth/auth-layout"
 import { LoginPage } from "../features/auth/pages/login-page"
@@ -30,13 +31,17 @@ import { teacherRouteChildren } from "../features/teacher/routes/teacher-routes"
 import { StudentProfileGuard } from "./routes/student-profile-guard"
 import { StudentProfileSetupPage } from "../features/student/pages/student-profile-setup-page"
 import { ProfilePage } from "../features/profile/pages/profile-page"
+import { AdminProfilePage } from "../features/profile/pages/admin-profile-page"
 import { RoleDashboardPage } from "../features/dashboard/pages/role-dashboard-page"
+import { TeacherDashboardPage } from "../features/dashboard/pages/teacher-dashboard-page"
 import { SubjectsPage } from "../features/admin/pages/subjects-page"
 import { GradeLevelsPage } from "../features/admin/pages/grade-levels-page"
 import { LessonCategoriesPage } from "../features/admin/pages/lesson-categories-page"
 import { UnitsPage } from "../features/admin/pages/units-page"
 import { TopicsPage } from "../features/admin/pages/topics-page"
 import { UserDetailsPage } from "../features/admin/pages/users/user-details-page"
+import { ReportsPage } from "../features/reports/pages/reports-page"
+import { SiteSettingsPage } from "../features/site-settings/pages/site-settings-page"
 
 
 function PlaceholderPage({ title }: { title: string }) {
@@ -74,7 +79,7 @@ export const router = createBrowserRouter([
                 element: <TeacherProfileGuard />,
                 children: [
                   { index: true, element: <Navigate to="dashboard" replace /> },
-                  { path: "dashboard", element: <RoleDashboardPage title="Teacher Dashboard" /> },
+                  { path: "dashboard", element: <TeacherDashboardPage /> },
                   { path: "profile-setup", element: <TeacherProfileSetupPage /> },
                   ...teacherRouteChildren,
                   { path: "topics", element: <PlaceholderPage title="Ders Konu Yönetimi" /> },
@@ -131,13 +136,15 @@ export const router = createBrowserRouter([
               { path: "params/lesson-categories", element: <LessonCategoriesPage /> },
               { path: "params/units", element: <UnitsPage /> },
               { path: "params/topics", element: <TopicsPage /> },
+              { path: "reports", element: <ReportsPage /> },
+              { path: "billing/plans", element: <PlansPage /> },
+              { path: "billing/subscriptions", element: <SubscriptionsPage /> },
+              { path: "settings/site", element: <SiteSettingsPage /> },
+              { path: "profile", element: <AdminProfilePage /> },
             ],
           },
-
-          { path: "/billing", element: <BillingPage /> },
           { path: "/roles", element: <PlaceholderPage title="Roles" /> },
           { path: "/permissions", element: <PlaceholderPage title="Permissions" /> },
-          { path: "/reports", element: <PlaceholderPage title="Reports" /> },
           { path: "/events", element: <PlaceholderPage title="Events" /> },
 
         ],

@@ -71,6 +71,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    avatar = models.ImageField(upload_to="avatars/%Y/%m/", null=True, blank=True)
+
+    # JWT invalidation: artırıldığında tüm mevcut tokenlar geçersiz olur (tüm cihazlardan çıkış)
+    token_version = models.IntegerField(default=0)
 
     objects = UserManager()
 
@@ -113,3 +117,37 @@ class StudentProfile(models.Model):
 
     def __str__(self):
         return f"StudentProfile({self.user.email})"
+
+
+class AuthEventLog(models.Model):
+    """Login, logout, refresh gibi auth eventlerinin logu."""
+
+    class EventType(models.TextChoices):
+        LOGIN_SUCCESS = "LOGIN_SUCCESS", "Login Success"
+        LOGIN_FAIL = "LOGIN_FAIL", "Login Fail"
+        LOGOUT = "LOGOUT", "Logout"
+        REFRESH = "REFRESH", "Token Refresh"
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="auth_event_logs",
+    )
+    event_type = models.CharField(max_length=20, choices=EventType.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(blank=True)
+    meta = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["created_at"]),
+            models.Index(fields=["user", "created_at"]),
+            models.Index(fields=["event_type", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.event_type} ({self.user_id or 'anon'}) @ {self.created_at}"

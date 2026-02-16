@@ -2,6 +2,7 @@
 import { Input } from "@shared/ui/input"
 import { Select } from "@shared/ui/select"
 import { Button } from "@shared/ui/button"
+import { Tooltip } from "@shared/ui/tooltip"
 import { Search } from "lucide-react"
 import type { ListFilters } from "../types"
 
@@ -17,6 +18,7 @@ export type AssignmentToolbarProps = {
   actionVariant: "primary" | "destructive"
   actionDisabled: boolean
   actionLoading?: boolean
+  actionTooltip?: string
   gradeLevels?: GradeLevelOption[]
 }
 
@@ -30,6 +32,7 @@ export function AssignmentToolbar({
   actionVariant,
   actionDisabled,
   actionLoading,
+  actionTooltip,
   gradeLevels = [],
 }: AssignmentToolbarProps) {
   return (
@@ -76,16 +79,32 @@ export function AssignmentToolbar({
       </div>
       {selectionCount > 0 && (
         <div className="flex justify-end">
-          <Button
-            type="button"
-            variant={actionVariant === "destructive" ? "destructive" : "primary"}
-            size="sm"
-            onClick={onAction}
-            disabled={actionDisabled || actionLoading}
-            loading={actionLoading}
-          >
-            {actionLabel}
-          </Button>
+          {actionTooltip && actionDisabled ? (
+            <Tooltip content={actionTooltip}>
+              <span className="inline-block">
+                <Button
+                  type="button"
+                  variant={actionVariant === "destructive" ? "destructive" : "primary"}
+                  size="sm"
+                  disabled
+                  loading={actionLoading}
+                >
+                  {actionLabel}
+                </Button>
+              </span>
+            </Tooltip>
+          ) : (
+            <Button
+              type="button"
+              variant={actionVariant === "destructive" ? "destructive" : "primary"}
+              size="sm"
+              onClick={onAction}
+              disabled={actionDisabled || actionLoading}
+              loading={actionLoading}
+            >
+              {actionLabel}
+            </Button>
+          )}
         </div>
       )}
     </div>

@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import type { AxiosResponse } from "axios"
+import { toast } from "sonner"
+import { getErrorMessage } from "@shared/lib/toast-messages"
 import { apiClient } from "@shared/api/client"
 
 type Role = "ADMIN" | "TEACHER" | "STUDENT"
@@ -45,6 +47,7 @@ type AuthContextType = {
   registerTeacher: (payload: RegisterTeacherPayload) => Promise<User>
   refreshMe: () => Promise<User | null>
   logout: (opts?: { redirect?: boolean }) => void
+  logoutAll: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -380,10 +383,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    clearTokens()
-    setShowIdleWarning(false)
-    setUser(null)
-    broadcastLogout("logout_no_redirect")
+    const doLocalLogout = () => {
+      clearTokens()
+      setShowIdleWarning(false)
+      setUser(null)
+      broadcastLogout("logout_no_redirect")
+    }
+
+    // Logout endpoint logs the event (token still valid here)
+    api.post("/auth/logout/").then(doLocalLogout).catch(doLocalLogout)
+  }
+
+  const logoutAll = async () => {
+    try {
+      await api.post("/auth/logout-all/")
+      clearTokens()
+      setShowIdleWarning(false)
+      setUser(null)
+      broadcastLogout("logout_all")
+      toast.success("Tüm oturumlar sonlandırıldı")
+      window.location.replace("/login")
+    } catch (err) {
+      toast.error(getErrorMessage(err))
+      throw err
+    }
   }
 
   const value = useMemo<AuthContextType>(
@@ -396,6 +419,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       registerTeacher,
       refreshMe,
       logout,
+      logoutAll,
     }),
     [user, isLoading, isBootstrapping]
   )

@@ -1,16 +1,33 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 
 from accounts.utils.normalize import tr_title
 from accounts.utils.phone import normalize_tr_phone
+from accounts.utils.avatar import process_avatar, MAX_FILE_BYTES, ALLOWED_EXTENSIONS
 
 User = get_user_model()
 
 
+def _validate_avatar_file(file) -> None:
+    """Validate avatar: image, max 2MB, allowed extensions."""
+    if file is None:
+        return
+    if not hasattr(file, "size") or file.size > MAX_FILE_BYTES:
+        raise serializers.ValidationError("Dosya boyutu 2MB'ı aşamaz.")
+    ext = None
+    if hasattr(file, "name") and file.name:
+        ext = "." + file.name.rsplit(".", 1)[-1].lower() if "." in file.name else ""
+    if ext and ext not in ALLOWED_EXTENSIONS:
+        raise serializers.ValidationError(
+            f"Sadece şu formatlar desteklenir: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+
+
 class MeUpdateSerializer(serializers.Serializer):
-    """PATCH /auth/me/ için profile güncelleme."""
+    """PATCH /auth/me/ için profile güncelleme. JSON veya multipart destekler."""
 
     first_name = serializers.CharField(required=False, allow_blank=True, max_length=50)
     last_name = serializers.CharField(required=False, allow_blank=True, max_length=50)
@@ -19,6 +36,13 @@ class MeUpdateSerializer(serializers.Serializer):
         choices=[(c.value, c.label) for c in User.Gender],
         required=False,
     )
+    avatar = serializers.ImageField(required=False, allow_null=True)
+
+    def validate_avatar(self, value):
+        if value is None:
+            return None
+        _validate_avatar_file(value)
+        return value
 
     def validate_first_name(self, value):
         if not value or not value.strip():
@@ -58,6 +82,31 @@ class MeUpdateSerializer(serializers.Serializer):
         if "gender" in validated_data:
             user.gender = validated_data["gender"] or User.Gender.UNSPECIFIED
             update_fields.append("gender")
+
+        # Avatar: null = remove, file = upload (with optional resize)
+        if "avatar" in validated_data:
+            avatar_val = validated_data["avatar"]
+            if avatar_val is None:
+                # Remove avatar
+                if user.avatar:
+                    user.avatar.delete(save=False)
+                user.avatar = None
+                update_fields.append("avatar")
+            else:
+                # Replace old avatar file
+                if user.avatar:
+                    user.avatar.delete(save=False)
+                # Upload new: try resize, fallback to original
+                processed = process_avatar(avatar_val)
+                if processed:
+                    name = f"avatar_{user.id}.jpg"
+                    user.avatar.save(name, ContentFile(processed), save=False)
+                else:
+                    if hasattr(avatar_val, "seek"):
+                        avatar_val.seek(0)
+                    user.avatar = avatar_val
+                update_fields.append("avatar")
+
         fn = (user.first_name or "").strip()
         ln = (user.last_name or "").strip()
         if fn and ln and not user.profile_completed:

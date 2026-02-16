@@ -68,6 +68,7 @@ function extractErrorFromApi(err: unknown): string {
         if (Array.isArray(detail) && detail.length > 0 && typeof detail[0] === "string")
           return detail[0]
       }
+      if ("message" in d && typeof d.message === "string") return d.message
       const first = Object.values(d)[0]
       if (Array.isArray(first)) return (first as string[])[0] ?? GENERIC_ERROR_MESSAGE
       if (typeof first === "string") return first
@@ -76,6 +77,63 @@ function extractErrorFromApi(err: unknown): string {
   }
   if (err instanceof Error && err.message) return err.message
   return GENERIC_ERROR_MESSAGE
+}
+
+/** Billing hatası - STUDENT_LIMIT_REACHED veya NO_SUBSCRIPTION */
+export function getStudentLimitError(err: unknown): {
+  isLimitReached: boolean
+  isNoSubscription: boolean
+  limit?: number
+  current?: number
+  message?: string
+} {
+  if (err && typeof err === "object" && "response" in err) {
+    const res = (err as { response?: { data?: unknown } }).response
+    const data = res?.data
+    if (data && typeof data === "object") {
+      const d = data as Record<string, unknown>
+      if (d.code === "STUDENT_LIMIT_REACHED") {
+        return {
+          isLimitReached: true,
+          isNoSubscription: false,
+          limit: typeof d.limit === "number" ? d.limit : undefined,
+          current: typeof d.current === "number" ? d.current : undefined,
+          message: typeof d.message === "string" ? d.message : undefined,
+        }
+      }
+      if (d.code === "NO_SUBSCRIPTION") {
+        return {
+          isLimitReached: false,
+          isNoSubscription: true,
+          message: typeof d.message === "string" ? d.message : undefined,
+        }
+      }
+    }
+  }
+  return { isLimitReached: false, isNoSubscription: false }
+}
+
+/** LIMIT_TOO_LOW hatası - plan düşürülemez */
+export function getLimitTooLowError(err: unknown): {
+  isLimitTooLow: boolean
+  current?: number
+  limit?: number
+} {
+  if (err && typeof err === "object" && "response" in err) {
+    const res = (err as { response?: { data?: unknown } }).response
+    const data = res?.data
+    if (data && typeof data === "object") {
+      const d = data as Record<string, unknown>
+      if (d.code === "LIMIT_TOO_LOW") {
+        return {
+          isLimitTooLow: true,
+          current: typeof d.current === "number" ? d.current : undefined,
+          limit: typeof d.limit === "number" ? d.limit : undefined,
+        }
+      }
+    }
+  }
+  return { isLimitTooLow: false }
 }
 
 /**

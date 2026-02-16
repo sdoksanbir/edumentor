@@ -49,7 +49,11 @@ api.interceptors.request.use((config) => {
   const token = getAccessToken()
   if (token) {
     config.headers = config.headers ?? {}
-    ;(config.headers as any).Authorization = `Bearer ${token}`
+    ;(config.headers as Record<string, string>).Authorization = `Bearer ${token}`
+  }
+  // FormData ile multipart upload: Content-Type'ı kaldır, axios boundary ile set eder
+  if (config.data instanceof FormData) {
+    delete (config.headers as Record<string, unknown>)["Content-Type"]
   }
   return config
 })

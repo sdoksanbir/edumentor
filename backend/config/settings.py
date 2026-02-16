@@ -44,11 +44,14 @@ INSTALLED_APPS = [
     "accounts",
     "catalog",
     "shared",
+    "billing",
+    "site_settings",
 ]
 
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "site_settings.middleware.MaintenanceMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -125,6 +128,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Media files (user uploads: avatar, etc.)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
 AUTH_USER_MODEL = "accounts.User"
 
 
@@ -135,7 +142,7 @@ CORS_ALLOWED_ORIGINS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.SessionAuthentication",  # ✅ admin login ile çalışır
-        "rest_framework_simplejwt.authentication.JWTAuthentication",  # ✅ frontend için
+        "accounts.authentication.TRJWTAuthentication",  # ✅ frontend JWT + token_version
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

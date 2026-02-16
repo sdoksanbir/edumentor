@@ -39,7 +39,13 @@ export const authApi = {
     return res.data
   },
 
-  logout() {
-    api.clearTokens()
+  async logout() {
+    try {
+      await api.post("/auth/logout/")
+    } catch {
+      // Ignore - always clear tokens
+    } finally {
+      api.clearTokens()
+    }
   },
 }

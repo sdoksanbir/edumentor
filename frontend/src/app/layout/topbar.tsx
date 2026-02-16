@@ -324,7 +324,7 @@ export function Topbar({
               <div className="border-b border-border/50 mb-1" />
 
               {/* Menu Items */}
-              <NavLink to="/profile">
+              <NavLink to={user?.role === "ADMIN" || user?.is_staff ? "/panel/profile" : "/profile"}>
                 {({ isActive }) => (
                   <div
                     className={`h-10 px-3 rounded-lg flex items-center gap-3 text-sm transition-colors ${

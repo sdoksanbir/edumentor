@@ -21,6 +21,7 @@ export type StudentsDualListProps = {
   actionVariant: "primary" | "destructive"
   actionDisabled: boolean
   actionLoading?: boolean
+  actionTooltip?: string
   emptyMessage?: string
   gradeLevels?: GradeLevelOption[]
 }
@@ -58,6 +59,7 @@ export function StudentsDualList({
   actionVariant,
   actionDisabled,
   actionLoading,
+  actionTooltip,
   emptyMessage,
   gradeLevels = [],
 }: StudentsDualListProps) {
@@ -77,6 +79,7 @@ export function StudentsDualList({
           actionVariant={actionVariant}
           actionDisabled={actionDisabled}
           actionLoading={actionLoading}
+          actionTooltip={actionTooltip}
           gradeLevels={gradeLevels}
         />
       </CardHeader>

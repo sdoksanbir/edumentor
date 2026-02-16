@@ -1,6 +1,7 @@
 // src/features/admin/assignments/pages/teacher-student-assignment-page.tsx
 import { useState, useEffect, useCallback } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Card, CardContent } from "@shared/ui/card"
 import { TeacherPicker } from "../components/teacher-picker"
@@ -15,9 +16,11 @@ import {
   mapTeacherApiToUi,
   mapStudentApiToUi,
 } from "../api"
+import { getTeacherSubscription, billingKeys } from "@features/billing/api/billingApi"
 import { getAssignedTeacherId } from "../get-assigned-teacher-id"
 import { confirmUnassign } from "@shared/lib/confirm-unassign"
-import { getErrorMessage } from "@shared/lib/toast-messages"
+import { getErrorMessage, getStudentLimitError } from "@shared/lib/toast-messages"
+import { studentLimitReachedAlert } from "@shared/lib/swal"
 import { listGradeLevels, catalogKeys } from "@features/admin/api/admin-api"
 import type { Teacher, Student, ListFilters } from "../types"
 
@@ -28,6 +31,7 @@ const DEFAULT_FILTERS: ListFilters = {
 }
 
 export function TeacherStudentAssignmentPage() {
+  const navigate = useNavigate()
   const [teachersLoading, setTeachersLoading] = useState(true)
   const [teachers, setTeachers] = useState<Teacher[]>([])
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null)
@@ -43,6 +47,12 @@ export function TeacherStudentAssignmentPage() {
   const { data: gradeLevels = [] } = useQuery({
     queryKey: catalogKeys.gradeLevels("CLASS_EXAM"),
     queryFn: () => listGradeLevels(),
+  })
+
+  const { data: subscriptionInfo } = useQuery({
+    queryKey: billingKeys.teacherSubscription(selectedTeacher?.id ?? 0),
+    queryFn: () => getTeacherSubscription(selectedTeacher!.id),
+    enabled: !!selectedTeacher?.id,
   })
   const gradeLevelOptions = gradeLevels
     .filter((g) => g.kind === "CLASS" || g.kind === "EXAM")
@@ -118,9 +128,19 @@ export function TeacherStudentAssignmentPage() {
       setSelectedAvailable(new Set())
       toast.success(`${selectedAvailable.size} öğrenci atandı`)
     } catch (err) {
-      const msg = getErrorMessage(err)
-      toast.error(msg)
-      if (/atanmış|already assigned|assigned/i.test(msg)) {
+      const limitErr = getStudentLimitError(err)
+      if (limitErr.isLimitReached) {
+        await studentLimitReachedAlert({
+          limit: limitErr.limit ?? 0,
+          current: limitErr.current ?? 0,
+          onViewPlans: () => navigate("/panel/billing/subscriptions"),
+        })
+      } else if (limitErr.isNoSubscription) {
+        toast.error(limitErr.message ?? "Öğretmenin aktif aboneliği yok.")
+      } else {
+        toast.error(getErrorMessage(err))
+      }
+      if (/atanmış|already assigned|assigned/i.test(getErrorMessage(err))) {
         const allStudents = await fetchAllStudentsFromUsers()
         const assigned = allStudents.filter(
           (s) => getAssignedTeacherId(s) === selectedTeacher.id
@@ -237,7 +257,26 @@ export function TeacherStudentAssignmentPage() {
           compact={false}
         />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-4">
+          {subscriptionInfo && subscriptionInfo.subscription && (
+            <div
+              className={`rounded-xl border px-4 py-3 text-sm ${
+                (subscriptionInfo.remaining_slots ?? 0) === 0
+                  ? "border-amber-500/50 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  : "border-border bg-muted/30"
+              }`}
+            >
+              <span className="font-medium">Kota:</span>{" "}
+              {subscriptionInfo.limit} | Kullanılan: {subscriptionInfo.assigned_students_count} |
+              Kalan: {subscriptionInfo.remaining_slots}
+              {(subscriptionInfo.remaining_slots ?? 0) === 0 && (
+                <span className="ml-2 text-amber-600 dark:text-amber-400">
+                  Öğrenci kotası doldu. Paketi yükseltin.
+                </span>
+              )}
+            </div>
+          )}
+          <div className="grid gap-6 lg:grid-cols-2">
           <StudentsDualList
             mode="available"
             students={availableStudents}
@@ -248,8 +287,20 @@ export function TeacherStudentAssignmentPage() {
             onBulkAction={handleAssign}
             actionLabel="Seçilenleri Ata"
             actionVariant="primary"
-            actionDisabled={selectedAvailable.size === 0}
+            actionDisabled={
+              selectedAvailable.size === 0 ||
+              (subscriptionInfo != null &&
+                (!subscriptionInfo.subscription ||
+                  (subscriptionInfo.remaining_slots ?? 0) === 0))
+            }
             actionLoading={assigning}
+            actionTooltip={
+              subscriptionInfo != null && !subscriptionInfo.subscription
+                ? "Öğretmenin aboneliği yok. Önce abonelik atayın."
+                : subscriptionInfo != null && (subscriptionInfo.remaining_slots ?? 0) === 0
+                  ? "Öğrenci kotası doldu. Paketi yükseltin."
+                  : undefined
+            }
             emptyMessage="Bu öğretmene atanabilecek öğrenci yok veya arama sonucu boş."
             gradeLevels={gradeLevelOptions}
           />
@@ -268,6 +319,7 @@ export function TeacherStudentAssignmentPage() {
             emptyMessage="Bu öğretmene henüz öğrenci atanmamış."
             gradeLevels={gradeLevelOptions}
           />
+          </div>
         </div>
       )}
     </div>

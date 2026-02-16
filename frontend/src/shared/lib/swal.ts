@@ -30,20 +30,6 @@ function getBaseOptions() {
   } as const
 }
 
-const BASE_OPTIONS = {
-  width: 420,
-  customClass: {
-    popup: "rounded-xl",
-  },
-  background: "#1f2937",
-  color: "#f9fafb",
-  confirmButtonColor: "#FF9B51",
-  cancelButtonColor: "#6b7280",
-  reverseButtons: true,
-  showCancelButton: true,
-  focusCancel: true,
-} as const
-
 /** Şifre sıfırlama onayı - info/question ikon, "Geçici şifre oluştur" butonu */
 export async function resetPasswordConfirm(options: {
   fullName: string
@@ -101,7 +87,7 @@ export async function confirmDelete(
   text?: string
 ): Promise<{ isConfirmed: boolean }> {
   const result = await Swal.fire({
-    ...BASE_OPTIONS,
+    ...getBaseOptions(),
     title,
     text: text ?? "Bu işlem geri alınamaz.",
     icon: "warning",
@@ -118,7 +104,7 @@ export async function confirmBulkDelete(
   const title = options?.title ?? "Seçilen kayıtlar silinsin mi?"
   const text = `Bu işlem geri alınamaz. (${count} kayıt)`
   const result = await Swal.fire({
-    ...BASE_OPTIONS,
+    ...getBaseOptions(),
     title,
     text,
     icon: "warning",
@@ -134,7 +120,7 @@ export async function confirmAction(
   confirmText?: string
 ): Promise<{ isConfirmed: boolean }> {
   const result = await Swal.fire({
-    ...BASE_OPTIONS,
+    ...getBaseOptions(),
     title,
     text,
     icon: "question",
@@ -146,7 +132,7 @@ export async function confirmAction(
 
 export async function successAlert(title: string, text?: string): Promise<void> {
   await Swal.fire({
-    ...BASE_OPTIONS,
+    ...getBaseOptions(),
     title,
     text,
     icon: "success",
@@ -157,11 +143,48 @@ export async function successAlert(title: string, text?: string): Promise<void> 
 
 export async function errorAlert(title: string, text?: string): Promise<void> {
   await Swal.fire({
-    ...BASE_OPTIONS,
+    ...getBaseOptions(),
     title,
     text,
     icon: "error",
     showCancelButton: false,
     confirmButtonText: "Tamam",
   })
+}
+
+/** Plan düşürülemez - öğrenci sayısı > yeni limit */
+export async function limitTooLowAlert(options: {
+  current: number
+  limit: number
+}): Promise<void> {
+  const { current, limit } = options
+  await Swal.fire({
+    ...getBaseOptions(),
+    title: "Plan Düşürülemez",
+    html: `Mevcut öğrenci: <strong>${current}</strong>, Yeni limit: <strong>${limit}</strong>. Önce öğrenci sayısını azaltın.`,
+    icon: "warning",
+    showCancelButton: false,
+    confirmButtonText: "Tamam",
+  })
+}
+
+/** Öğrenci kotası doldu - Paketleri Gör + Kapat butonları */
+export async function studentLimitReachedAlert(options: {
+  limit: number
+  current: number
+  onViewPlans?: () => void
+}): Promise<void> {
+  const { limit, current, onViewPlans } = options
+  const result = await Swal.fire({
+    ...getBaseOptions(),
+    title: "Öğrenci Kotası Doldu",
+    html: `Mevcut pakette <strong>${limit}</strong> öğrenci hakkınız var. Şu an <strong>${current}</strong> öğrenci atanmış.`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: onViewPlans ? "Paketleri Gör" : "Tamam",
+    cancelButtonText: "Kapat",
+  })
+  if (result.isConfirmed && onViewPlans) {
+    onViewPlans()
+  }
 }

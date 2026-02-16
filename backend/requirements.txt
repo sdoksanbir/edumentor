@@ -5,5 +5,8 @@ django-cors-headers==4.9.0
 djangorestframework-simplejwt==5.5.1
 PyJWT==2.11.0
 
+# Image processing (avatar upload)
+Pillow>=10.0.0
+
 # Database (SQLite varsayılan - PostgreSQL için opsiyonel)
 # psycopg[binary]==3.3.2

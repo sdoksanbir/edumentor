@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User, TeacherProfile, StudentProfile
+from billing.views import _check_teacher_quota
 from .permissions import IsAdminOnly
 from .panel_serializers import (
     PanelUserSerializer,
@@ -218,6 +219,20 @@ class TeacherAssignStudentsView(APIView):
         ids = request.data.get("student_ids", [])
         if not ids:
             return Response({"detail": "student_ids zorunludur."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kota kontrolü: abonelik ve limit
+        can_assign, limit, current, msg = _check_teacher_quota(tp.id, new_student_count=len(ids))
+        if not can_assign:
+            code = "NO_SUBSCRIPTION" if limit == 0 and current == 0 else "STUDENT_LIMIT_REACHED"
+            return Response(
+                {
+                    "code": code,
+                    "message": msg,
+                    "limit": limit,
+                    "current": current,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # Enforce: one student = one teacher. Reject if already assigned to another teacher.
         already_assigned = StudentProfile.objects.filter(
